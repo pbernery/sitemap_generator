@@ -73,6 +73,19 @@ describe SitemapGenerator::Builder::SitemapUrl do
     url[:loc].should == "http://example.com/#{special}/#{special}"
   end
 
+  it "should support a xhtml:link option" do 
+    loc = SitemapGenerator::Builder::SitemapUrl.new('', :host => 'http://test.com', 'xhtml:link' => {
+			:href => 'http://www.example.com',
+			:hreflang => 'fr'
+    })
+    
+    loc['xhtml:link'].should == {
+      :rel => 'alternate',
+      :href => 'http://www.example.com',
+      :hreflang => 'fr'
+    }
+  end
+
   describe "w3c_date" do
     it "should convert dates and times to W3C format" do
       url = new_url

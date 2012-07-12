@@ -33,8 +33,8 @@ module SitemapGenerator
           path = sitemap.location.path_in_public
         end
 
-        SitemapGenerator::Utilities.assert_valid_keys(options, :priority, :changefreq, :lastmod, :host, :images, :video, :geo, :news, :videos)
-        SitemapGenerator::Utilities.reverse_merge!(options, :priority => 0.5, :changefreq => 'weekly', :lastmod => Time.now, :images => [], :news => {}, :videos => [])
+        SitemapGenerator::Utilities.assert_valid_keys(options, :priority, :changefreq, :lastmod, :host, :images, :video, :geo, :news, :videos, 'xhtml:link')
+        SitemapGenerator::Utilities.reverse_merge!(options, :priority => 0.5, :changefreq => 'weekly', :lastmod => Time.now, :images => [], :news => {}, :videos => [], 'xhtml:link' => {})
         raise "Cannot generate a url without a host" unless SitemapGenerator::Utilities.present?(options[:host])
         if video = options.delete(:video)
           options[:videos] = video.is_a?(Array) ? options[:videos].concat(video) : options[:videos] << video
@@ -51,7 +51,8 @@ module SitemapGenerator
           :images     => prepare_images(options[:images], options[:host]),
           :news       => prepare_news(options[:news]),
           :videos     => options[:videos],
-          :geo        => options[:geo]
+          :geo        => options[:geo],
+          'xhtml:link' => prepare_xhtml_link(options['xhtml:link'])
         )
       end
 
@@ -79,6 +80,11 @@ module SitemapGenerator
               builder.news :keywords, news_data[:keywords] if news_data[:keywords]
               builder.news :stock_tickers, news_data[:stock_tickers] if news_data[:stock_tickers]
             end
+          end
+
+          unless SitemapGenerator::Utilities.blank?(self['xhtml:link'])
+            link_data = self['xhtml:link']
+            builder.tag('xhtml:link', :rel => 'alternate', :hreflang => link_data[:hreflang], :href => link_data[:href])
           end
 
           self[:images].each do |image|
@@ -135,6 +141,14 @@ module SitemapGenerator
       def prepare_news(news)
         SitemapGenerator::Utilities.assert_valid_keys(news, :publication_name, :publication_language, :publication_date, :genres, :access, :title, :keywords, :stock_tickers) unless news.empty?
         news
+      end
+
+      def prepare_xhtml_link(link)
+        unless link.empty?
+          SitemapGenerator::Utilities.assert_valid_keys(link, :rel, :hreflang, :href)
+          link[:rel] = 'alternate' unless link.has_key? :rel
+        end
+        link
       end
 
       # Return an Array of image option Hashes suitable to be parsed by SitemapGenerator::Builder::SitemapFile
