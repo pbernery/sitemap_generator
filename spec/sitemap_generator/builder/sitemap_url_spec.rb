@@ -74,18 +74,40 @@ describe SitemapGenerator::Builder::SitemapUrl do
   end
 
   it "should support a xhtml:link option" do 
-    loc = SitemapGenerator::Builder::SitemapUrl.new('', :host => 'http://test.com', 'xhtml:link' => {
-			:href => 'http://www.example.com',
-			:hreflang => 'fr'
-    })
+    loc = SitemapGenerator::Builder::SitemapUrl.new('', :host => 'http://test.com', 'xhtml:link' => [
+      {
+			  :href => 'http://www.example.com/fr',
+			  :hreflang => 'fr'
+      },
+      {
+			  :href => 'http://www.example.com/de',
+			  :hreflang => 'de'
+      },
+      {
+			  :href => 'http://www.example.com',
+			  :hreflang => 'en'
+			}
+    ])
     
-    loc['xhtml:link'].should == {
-      :rel => 'alternate',
-      :href => 'http://www.example.com',
-      :hreflang => 'fr'
-    }
+    loc['xhtml:link'].should == [
+      {
+        :rel => 'alternate',
+			  :href => 'http://www.example.com/fr',
+			  :hreflang => 'fr'
+      },
+      {
+        :rel => 'alternate',
+        :href => 'http://www.example.com/de',
+			  :hreflang => 'de'
+      },
+      {
+        :rel => 'alternate',
+			  :href => 'http://www.example.com',
+			  :hreflang => 'en'
+			}
+    ]
     
-    loc.to_xml.should =~ /.*<xhtml:link rel="alternate" hreflang="fr" href="http:\/\/www.example.com"\/>.*/
+    loc.to_xml.should =~ /(<xhtml:link)+/
   end
 
   describe "w3c_date" do

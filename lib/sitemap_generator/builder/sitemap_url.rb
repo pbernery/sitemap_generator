@@ -52,7 +52,7 @@ module SitemapGenerator
           :news       => prepare_news(options[:news]),
           :videos     => options[:videos],
           :geo        => options[:geo],
-          'xhtml:link' => prepare_xhtml_link(options['xhtml:link'])
+          'xhtml:link' => prepare_xhtml_links(options['xhtml:link'])
         )
       end
 
@@ -83,8 +83,10 @@ module SitemapGenerator
           end
 
           unless SitemapGenerator::Utilities.blank?(self['xhtml:link'])
-            link_data = self['xhtml:link']
-            builder.xhtml :link, :rel => 'alternate', :hreflang => link_data[:hreflang], :href => link_data[:href]
+            links = self['xhtml:link']
+            for link in links
+              builder.xhtml :link, link
+            end
           end
 
           self[:images].each do |image|
@@ -143,12 +145,14 @@ module SitemapGenerator
         news
       end
 
-      def prepare_xhtml_link(link)
-        unless link.empty?
-          SitemapGenerator::Utilities.assert_valid_keys(link, :rel, :hreflang, :href)
-          link[:rel] = 'alternate' unless link.has_key? :rel
+      def prepare_xhtml_links(links)
+        unless links.empty?
+          for link in links
+            SitemapGenerator::Utilities.assert_valid_keys(link, :rel, :hreflang, :href)
+            link[:rel] = 'alternate' unless link.has_key? :rel
+          end
         end
-        link
+        links
       end
 
       # Return an Array of image option Hashes suitable to be parsed by SitemapGenerator::Builder::SitemapFile
