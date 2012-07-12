@@ -84,7 +84,7 @@ module SitemapGenerator
 
           unless SitemapGenerator::Utilities.blank?(self['xhtml:link'])
             link_data = self['xhtml:link']
-            builder.tag('xhtml:link', :rel => 'alternate', :hreflang => link_data[:hreflang], :href => link_data[:href])
+            builder.xhtml :link, :rel => 'alternate', :hreflang => link_data[:hreflang], :href => link_data[:href]
           end
 
           self[:images].each do |image|

@@ -84,6 +84,8 @@ describe SitemapGenerator::Builder::SitemapUrl do
       :href => 'http://www.example.com',
       :hreflang => 'fr'
     }
+    
+    loc.to_xml.should =~ /.*<xhtml:link rel="alternate" hreflang="fr" href="http:\/\/www.example.com"\/>.*/
   end
 
   describe "w3c_date" do
